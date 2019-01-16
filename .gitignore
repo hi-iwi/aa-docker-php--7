@@ -1,0 +1,11 @@
+# 禁止公开的服务
+.idea
+.DS_Store
+*.~$lock
+
+
+/.git_bitbucket
+/.git_github
+
+node_modules
+yarn-error.log
