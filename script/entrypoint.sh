@@ -48,17 +48,17 @@ aaLog "Generating SSL Certificate..."
 GenSslCrt "${GEN_SSL_CRT}"
 
 
-php_ext_dir=$(php -i | grep "^extension_dir =>" | awk -F ' => ' '{print $2}')
-php_conf_dir=$(echo $(php --ini | grep "Scan") | awk -F ': ' '{print $2}')
+declare php_ext_dir=$(php -i | grep "^extension_dir =>" | awk -F ' => ' '{print $2}')
+declare php_conf_dir=$(echo $(php --ini | grep "Scan") | awk -F ': ' '{print $2}')
 
 if [ ! -z "$php_conf_dir" ]; then
-	default_php_conf=$php_conf_dir"/php.ini"
+	declare default_php_conf=$php_conf_dir"/php.ini"
 fi
 
 # xdebug-2.4.0,xhprof-php7/extension
 
 installZephir() {
-    dependency="$1"
+    local dependency="$1"
     # Install zephir
     aaLog ":  Installing $dependency"
     #remove all sudo in zephir shell scripts
@@ -94,6 +94,7 @@ enableExtCassandra() {
 
 enableExtRdkafka() {
     if [ -z "${LibRdkafkaVer}" ]; then
+        local librdkafka
         for librdkafka in $(ls "${PHPExtDependencies}" | grep ^librdkafka); do
             if [ -f "${PHPExtDependencies}/${librdkafka}/Makefile" ]; then
                 LibRdkafkaVer="${librdkafka}"
@@ -105,16 +106,16 @@ enableExtRdkafka() {
         aaLog --aalogpri_severity EMERGENCY "librdkafka (version 0.11.3+) is not specified!!!"
     fi
     aaLog "Trying to install LibRdKafka: ${LibRdkafkaVer}"
-    libKafka="${PHPExtDependencies}/${LibRdkafkaVer}"
-    if [ ! -f "${libKafka}/Makefile" ]; then
+    local lib_kafka="${PHPExtDependencies}/${LibRdkafkaVer}"
+    if [ ! -f "${lib_kafka}/Makefile" ]; then
         aaLog "LibRdKafka: ${LibRdkafkaVer} Not Exist! Downloading..."
-        v=${LibRdkafkaVer/librdkafka-/}
-        curl -sSL "https://github.com/edenhill/librdkafka/archive/v${v}.tar.gz" -o $libKafka'.tgz'
+        local v=${LibRdkafkaVer/librdkafka-/}
+        curl -sSL "https://github.com/edenhill/librdkafka/archive/v${v}.tar.gz" -o $lib_kafka'.tgz'
         cd ${PHPExtDependencies}
-        tar -zxvf $libKafka'.tgz' -C "${libKafka}"
-        rm -f "${libKafka}.tgz"
+        tar -zxvf $lib_kafka'.tgz' -C "${lib_kafka}"
+        rm -f "${lib_kafka}.tgz"
     fi
-    cd "${libKafka}"
+    cd "${lib_kafka}"
     ./configure
     make && make install
 }
@@ -123,6 +124,7 @@ enableExtZookeeper() {
     # requires libzookeeper
     # libzookeeper is in  zookeeper/src/c/
     if [ -z "${LibZookeeperVer}" ]; then
+        local libzookeeper
         for libzookeeper in $(ls "${PHPExtDependencies}" | grep ^zookeeper); do
             if [ -f "${PHPExtDependencies}/${libzookeeper}/src/c/configure" ]; then
                 LibZookeeperVer="${libzookeeper}"
@@ -135,15 +137,15 @@ enableExtZookeeper() {
     fi
     aaLog "Trying to install Zookeeper Lib: ${LibZookeeperVer}"
 
-    libZookeeper="${PHPExtDependencies}/${LibZookeeperVer}"
+    lib_zookeeper="${PHPExtDependencies}/${LibZookeeperVer}"
 
-    if [ ! -f "${libZookeeper}/src/c/configure" ]; then
+    if [ ! -f "${lib_zookeeper}/src/c/configure" ]; then
         cd ${PHPExtSrc}
         curl -sSL "http://www-us.apache.org/dist/zookeeper/${LibZookeeperVer}/${LibZookeeperVer}.tar.gz"
         tar -zxvf "${LibZookeeperVer}.tar.gz"
         rm -f ${LibZookeeperVer}.tar.gz
     fi
-    cd "${libZookeeper}/src/c"
+    cd "${lib_zookeeper}/src/c"
     ./configure --prefix=/usr/local/zookeeper-c-cli
     make && make install
 }
@@ -162,12 +164,12 @@ enableExtGd() {
     yum install -y gd freetype freetype-devel libjpeg libjpeg-devel libpng libpng-devel
 }
 enableExtXdebug() {
-    enableExt=$1
-    if [ ! -d "${PHPExtSrc}/${enableExt}" ]; then
+    local enable_ext=$1
+    if [ ! -d "${PHPExtSrc}/${enable_ext}" ]; then
         cd ${PHPExtSrc}
-        if  curl -sSL "https://xdebug.org/files/${enableExt}.tgz" -o "${PHPExtSrc}/${enableExt}.tgz"; then
-            tar -zxvf ${PHPExtSrc}"/"$enableExt".tgz"
-            rm -f ${PHPExtSrc}"/"$enableExt".tgz"
+        if  curl -sSL "https://xdebug.org/files/${enable_ext}.tgz" -o "${PHPExtSrc}/${enable_ext}.tgz"; then
+            tar -zxvf ${PHPExtSrc}"/"$enable_ext".tgz"
+            rm -f ${PHPExtSrc}"/"$enable_ext".tgz"
         fi
     fi
 }
@@ -197,12 +199,12 @@ enableExtZlib() {
 }
 
 enableExtRedis() {
-    enableExt=$1
-    if [ ! -d "${PHPExtSrc}/${enableExt}" ]; then
+    local enable_ext=$1
+    if [ ! -d "${PHPExtSrc}/${enable_ext}" ]; then
         cd ${PHPExtSrc}
-        if  curl -sSL "http://pecl.php.net/get/$enableExt.tgz" -o "${PHPExtSrc}/${enableExt}.tgz"; then
-            tar -zxvf "${PHPExtSrc}/${enableExt}.tgz"
-            rm -f "${PHPExtSrc}/${enableExt}.tgz"
+        if  curl -sSL "http://pecl.php.net/get/${enable_ext}.tgz" -o "${PHPExtSrc}/${enable_ext}.tgz"; then
+            tar -zxvf "${PHPExtSrc}/${enable_ext}.tgz"
+            rm -f "${PHPExtSrc}/${enable_ext}.tgz"
         fi
     fi
 }
@@ -216,7 +218,7 @@ enableExtPhalcon() {
     if yum install -y re2c; then
         aaLog "re2c yum depository exists"
     else
-        declare epel_rpm
+        local epel_rpm
         # ls "*.rpm"    --> "*.rpm" file only;
         # ls *.rpm      --> regexp, all .rpm files
         cd "${PHPExtDependencies}"
@@ -243,6 +245,7 @@ enableExtPhalcon() {
 
     declare zephir_ver
     declare cphalcon_ver
+    declare dependency
 
     cd "${PHPExtSrc}"
     for dependency in $(ls "_dependencies"); do
@@ -362,14 +365,14 @@ enableExtPhalcon() {
 }
 
 enableExtPthread() {
-    enableExt=$1
-    if [ ! -d "${PHPExtSrc}/$enableExt" ]; then
+    local enable_ext=$1
+    if [ ! -d "${PHPExtSrc}/${enable_ext}" ]; then
         # pthreads-3.1.6  --->  3.1.6
-        pthreads_ver=$(echo $enableExt | awk -F '-' '{print $2}')
-        if curl -sSL "https://github.com/krakjoe/pthreads/archive/v"$pthreads_ver".tar.gz" -o "${PHPExtSrc}/${enableExt}.tar.gz"; then
+        local pthreads_ver=$(echo $enable_ext | awk -F '-' '{print $2}')
+        if curl -sSL "https://github.com/krakjoe/pthreads/archive/v"$pthreads_ver".tar.gz" -o "${PHPExtSrc}/${enable_ext}.tar.gz"; then
             cd ${PHPExtSrc}
-            tar -zxvf "${PHPExtSrc}/$enableExt.tar.gz"
-            rm -f "${PHPExtSrc}/$enableExt.tar.gz"
+            tar -zxvf "${PHPExtSrc}/${enable_ext}.tar.gz"
+            rm -f "${PHPExtSrc}/${enable_ext}.tar.gz"
         fi
     fi
 }
@@ -390,26 +393,27 @@ enableExtMosquitto() {
 }
 
 enableExtProtobuf() {
-    enableExt=$1
-    if [ ! -d "${PHPExtSrc}/${enableExt}" ]; then
+    local enable_ext=$1
+    if [ ! -d "${PHPExtSrc}/${enable_ext}" ]; then
         aaLog ""
-        protobuf_file_prefix='protobuf-php-'
-        protobuf_ver=${enableExt:${#protobuf_file_prefix}}
-        curl -sSL "https://github.com/google/protobuf/releases/download/v"$protobuf_ver"/"$enableExt".tar.gz" -o "${PHPExtSrc}/"$enableExt".tar.gz"
-        tar -zxvf "${PHPExtSrc}/"$enableExt".tar.gz"
-        rm -f "${PHPExtSrc}/"$enableExt".tar.gz"
+        local protobuf_file_prefix='protobuf-php-'
+        local protobuf_ver=${enable_ext:${#protobuf_file_prefix}}
+        curl -sSL "https://github.com/google/protobuf/releases/download/v"$protobuf_ver"/"$enable_ext".tar.gz" -o "${PHPExtSrc}/"$enable_ext".tar.gz"
+        tar -zxvf "${PHPExtSrc}/"$enable_ext".tar.gz"
+        rm -f "${PHPExtSrc}/"$enable_ext".tar.gz"
     fi
 
-    cd "${PHPExtSrc}/$enableExt"
+    cd "${PHPExtSrc}/$enable_ext"
     ./configure
     make && make install
 }
 
 enableExtSwoole() {
-    enableExt=$1
+    local enable_ext=$1
     #ulimit -n 100000
     [ ${PHPExtsWithSSL} -eq 1 ] && config_opt+=" --enable-openssl"
     if [ ${PHPExtsWithHTTP2} -eq 1 ]; then
+        local dependency
         for dependency in $(ls "${PHPExtDependencies}"); do
             if [ -f "${PHPExtDependencies}/$dependency/configure" ]; then
                 case "${dependency:0:7}" in
@@ -425,12 +429,12 @@ enableExtSwoole() {
         done
         config_opt+=" --enable-http2"
     fi
-    if [ ! -d "${PHPExtSrc}/${enableExt}" ]; then
-        aaLog "${PHPExtSrc}/${enableExt}  dosen't exist!"
-        if curl -sSL "http://pecl.php.net/get/${enableExt}.tgz" -o "${PHPExtSrc}/${enableExt}.tgz"; then
+    if [ ! -d "${PHPExtSrc}/${enable_ext}" ]; then
+        aaLog "${PHPExtSrc}/${enable_ext}  dosen't exist!"
+        if curl -sSL "http://pecl.php.net/get/${enable_ext}.tgz" -o "${PHPExtSrc}/${enable_ext}.tgz"; then
             cd ${PHPExtSrc}
-            tar -zxvf "${PHPExtSrc}/${enableExt}.tgz"
-            rm -f "${PHPExtSrc}/${enableExt}.tgz"
+            tar -zxvf "${PHPExtSrc}/${enable_ext}.tgz"
+            rm -f "${PHPExtSrc}/${enable_ext}.tgz"
         fi
     fi
 }
@@ -439,10 +443,18 @@ enableExts() {
 	    return 0
 	fi
     aaLog "Enabling Extensions: ${PHPEnableExts}"
+    local enable_ext
+    local ext
+    local pecl_channel
+    local ext_file
+    local is_standard_ext
+    local config_opt
+
+    local ext_list
     # for i in 100 200 300; do
     # for i in "100 200 300"; do    error!!!
-    for enableExt in $(echo "${PHPEnableExts}" | tr ',' "\n"); do
-        ext=$(echo "${enableExt}" | awk -F '-' '{print $1}')
+    for enable_ext in $(echo "${PHPEnableExts}" | tr ',' "\n"); do
+        ext=$(echo "${enable_ext}" | awk -F '-' '{print $1}')
         pecl_channel=''
         aaLog "Handling Extension: $ext"
         case "$ext" in
@@ -452,13 +464,13 @@ enableExts() {
             ;;
         esac
 
-        extFile="${php_ext_dir}/${ext}.so"
+        ext_file="${php_ext_dir}/${ext}.so"
 
-        if [ ! -f  $extFile ]; then
+        if [ ! -f  "$ext_file" ]; then
             aaLog " $ext doesn't exist. compile it..."
             cd "${PHPExtSrc}"
-            isStandardExt=1
-            config_opt=""
+            is_standard_ext=1
+            config_opt=''
 
             case "$ext" in
                 'bz2')
@@ -501,14 +513,14 @@ enableExts() {
                     enableExtRedis "${enableExt}"
                 ;;
                 'phalcon')
-                    isStandardExt=0
+                    is_standard_ext=0
                     enableExtPhalcon
                 ;;
                 'pthreads')
                     enableExtPthread "${enableExt}"
                 ;;
                 'codecept' | 'codeception')
-                    isStandardExt=0
+                    is_standard_ext=0
                     enableExtCodecept
                 ;;
                 'mosquitto')
@@ -516,39 +528,39 @@ enableExts() {
                 ;;
                 'protobuf')
                     enableExtProtobuf "${enableExt}"
-                    enableExt="${enableExt}/php/ext/google/protobuf"
+                    enable_ext="${enableExt}/php/ext/google/protobuf"
                 ;;
                 'swoole')
                     enableExtSwoole "${enableExt}"
                 ;;
             esac
 
-            aaLog "Checking whether $enableExt is a standard php extension: $isStandardExt"
+            aaLog "Checking whether $enable_ext is a standard php extension: $is_standard_ext"
 
-            if [ $isStandardExt -eq 1 ]; then
-                if [ ! -d "${PHPExtSrc}/$enableExt" -a "$enableExt" == "$ext" ]; then
-                    ext_list=$(ls ${PHPExtSrc} | grep ^"$enableExt"-)
+            if [ $is_standard_ext -eq 1 ]; then
+                if [ ! -d "${PHPExtSrc}/${enable_ext}" -a "$enable_ext" == "$ext" ]; then
+                    ext_list=$(ls ${PHPExtSrc} | grep ^"$enable_ext"-)
                     if [ ! -z "$ext_list" ]; then
-                        for e in $(ls ${PHPExtSrc} | grep ^"$enableExt"-); do
+                        for e in $(ls ${PHPExtSrc} | grep ^"$enable_ext"-); do
                             if [ -f "${PHPExtSrc}/$e/config.m4" ]; then
-                                enableExt="$e"
+                                enable_ext="$e"
                                 break
                             fi
                         done
                     fi
                 fi
 
-                if [ ! -d "${PHPExtSrc}/$enableExt" ]; then
+                if [ ! -d "${PHPExtSrc}/${enable_ext}" ]; then
                     if [ ! -z "$pecl_channel" ]; then
                         $ext="$pecl_channel"
                     fi
                     ${PHPPrefix}/bin/pecl install $ext
                 else
-                    cd "${PHPExtSrc}/$enableExt"
+                    cd "${PHPExtSrc}/${enable_ext}"
                     if [ ! -e "Makefile" ]; then
                         aaLog "phpize"
                         phpize
-                        aaLog "./configure $enableExt $config_opt"
+                        aaLog "./configure ${enable_ext} ${config_opt}"
                         ./configure $config_opt
                     fi
 
@@ -561,7 +573,7 @@ enableExts() {
                 fi
             fi
 
-            if [ -f "$php_ext_dir/"$ext".so" ]; then
+            if [ -f "${php_ext_dir}/"$ext".so" ]; then
                 aaLog "$ext Installed Successed"
             else
                 aaLog --aalogpri_severity ERROR "$ext Installed Failured!!!"
@@ -573,7 +585,9 @@ enableExts() {
     # Warning: PHPExtraConfs="'yaconf.directory=/tmp/;boc=/love'"
     if [ ! -z "${PHPExtraConfs}" ]; then
         # Remove the extra single-quotations
-        extra_confs=$(echo ${PHPExtraConfs} | sed "s/^'//")
+        local extra_confs=$(echo ${PHPExtraConfs} | sed "s/^'//")
+        local extra_conf
+        local ini
         if [ "$extra_confs" != ${PHPExtraConfs} ]; then
             extra_confs=$(echo $extra_confs | sed "s/'$//")
         fi
@@ -599,7 +613,9 @@ disableExts() {
         return 0
     fi
     aaLog "Disabling Extensions: ${PHPDisableExts}"
-    disable_exts=$(echo "${PHPDisableExts}" | tr ',' "\n")
+    local disable_exts=$(echo "${PHPDisableExts}" | tr ',' "\n")
+    local disable_ext
+    local ext
     for disable_ext in  $disable_exts; do
         ext=$(echo "$disable_ext" | awk -F '-' '{print $1}')
         case "$ext" in
@@ -620,7 +636,7 @@ grantPrivileges() {
 	chmod -R u+rwx ${WWW_HTDOCS} ${PHPLogDir}
 }
 
-lock_file="${S_P_L_DIR}/php-entrypoint-"$( echo -n "${LOG_TAG}" | md5sum | cut -d ' ' -f1)
+declare lock_file="${S_P_L_DIR}/php-entrypoint-"$( echo -n "${LOG_TAG}" | md5sum | cut -d ' ' -f1)
 if [ ! -f "$lock_file" ]; then
 	enableExts
 	disableExts
