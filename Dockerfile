@@ -3,7 +3,7 @@ MAINTAINER Aario <Aario@luexu.com>
 
 # http://pecl.php.net/package-stats.php
 
-ENV PHPVer php-7.3.1
+ENV PHPVer php-7.2.14
 ENV PHPSrcURL http://cn.php.net/distributions/${PHPVer}.tar.gz
 ENV PHPUser ${SHARED_USER}
 ENV PHPGroup ${SHARED_GROUP}

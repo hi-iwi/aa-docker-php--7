@@ -461,6 +461,9 @@ enableExts() {
             config_opt=""
 
             case "$ext" in
+                'bz2')
+                    yum install -y bzip2-devel
+                ;;
                 'cassandra') enableExtCassandra ;;
                 'rdkafka') enableExtRdkafka ;;
                 'zookeeper')
