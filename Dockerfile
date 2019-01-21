@@ -4,16 +4,17 @@ MAINTAINER Aario <Aario@luexu.com>
 # http://pecl.php.net/package-stats.php
 
 ENV PHPVer php-7.2.14
-ENV PHPSrcURL http://cn.php.net/distributions/${PHPVer}.tar.gz
+ENV PHPSrcURL http://php.net/distributions/${PHPVer}.tar.xz
 ENV PHPUser ${SHARED_USER}
 ENV PHPGroup ${SHARED_GROUP}
 
 WORKDIR ${SRC_DIR}
 ADD ./src/* ${SRC_DIR}/
 RUN if [ ! -d "${SRC_DIR}/${PHPVer}" ]; then                               \
-        curl -sSL ${PHPSrcURL} -o ${SRC_DIR}/${PHPVer}.tar.gz;           \
-        tar -zxvf ${SRC_DIR}/${PHPVer}.tar.gz;                             \
-        rm -f ${SRC_DIR}/${PHPVer}.tar.gz;                                 \
+        curl -sSL ${PHPSrcURL} -o ${SRC_DIR}/${PHPVer}.tar.xz;             \
+        xz -d ${SRC_DIR}/${PHPVer}.tar.xz ${SRC_DIR}/${PHPVer}.tar         \
+        tar -xvf ${SRC_DIR}/${PHPVer}.tar;                                 \
+        rm -f ${SRC_DIR}/${PHPVer}.tar*;                                   \
     fi
 
 # RUN 
