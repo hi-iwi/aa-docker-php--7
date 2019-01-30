@@ -490,8 +490,14 @@ enableExts() {
                     enableExtGd
                     config_opt+=" --enable-gd-native-ttf --with-jpeg-dir --with-freetype-dir"
                 ;;
+                'intl')
+                    yum install -y libicu-devel
+                ;;
                 'xml')
                     enableExtXml
+                ;;
+                'xsl')
+                    yum install -y libxslt-devel
                 ;;
                 # pdo_pgsql/pgsql needs a pre-installed postgresql
                 'pgsql' | 'pdo_pgsql')
@@ -558,6 +564,12 @@ enableExts() {
                 else
                     cd "${PHPExtSrc}/${enable_ext}"
                     if [ ! -e "Makefile" ]; then
+                        for m4 in ${PHPExtSrc}/${enable_ext}/config*.m4; do
+                            if [ ! -f "${PHPExtSrc}/${enable_ext}/config.m4" ]; then
+                                cp $m4 "${PHPExtSrc}/${enable_ext}/config.m4"
+                            fi
+                        done
+                        
                         aaLog "phpize"
                         phpize
                         aaLog "./configure ${enable_ext} ${config_opt}"
