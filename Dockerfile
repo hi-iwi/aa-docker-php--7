@@ -67,7 +67,8 @@ ENV PHPFPMPort 9000
 ENV PHPLogDir /var/log/php
 ENV WWW_HTDOCS /var/lib/htdocs
     
-COPY ./etc/* ${PHPConfScanDir}/
+COPY ./etc/aa/*.ini ${PHPConfScanDir}/
+COPY ./etc/aa/*.conf ${PHPConfScanDir}/
     
 WORKDIR ${PHPConfScanDir}
 RUN chown -R ${PHPUser}:${PHPGroup} ${PHPConfScanDir}
@@ -153,7 +154,7 @@ RUN ln ${PHPPrefix}/sbin/php-fpm       /usr/sbin/php-fpm   \
 	&& ln ${PHPPrefix}/bin/php         /usr/bin/php        \
 	&& ln ${PHPPrefix}/bin/phpize      /usr/bin/phpize     \
 	&& ln ${PHPPrefix}/bin/php-config  /usr/bin/php-config
-# /aa_script/entrypoint.sh php-fpm -F
-ENTRYPOINT ["/aa_script/entrypoint.sh", "/usr/local/php/sbin/php-fpm", "-F"]
+
+ENTRYPOINT ["/etc/aa/entrypoint", "/usr/local/php/sbin/php-fpm", "-F"]
 
 #COLUME ['/var/lib/htdocs', '/var/log']
